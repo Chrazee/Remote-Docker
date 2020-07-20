@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  nginx:
+    build:
+      context: ./src/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/web:/var/www/html
+    ports:
+      - "80:80"
+    depends_on:
+      - mysql
+      - php
+    networks:
+      - remote
+
+  php:
+    build:
+      context: ./src/php
+      dockerfile: Dockerfile
+    volumes:
+    - ./data/web:/var/www/html
+    links:
+      - device_relay:device_relay
+      - device_thermometer:device_thermometer
+    networks:
+      - remote
+
+  mysql:
+    image: mysql:8.0.20
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: $DB_DATABASE
+      MYSQL_USER: $DB_USERNAME
+      MYSQL_PASSWORD: $DB_PASSWORD
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - remote
+
+  helper:
+    build:
+      context: ./src/helper
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./data/web:/var/www/html
+    links:
+      - mysql:mysql
+    command: sh -c /usr/bin/setup.sh
+    networks:
+      - remote
+
+  device_thermometer:
+    build:
+      context: ./devices
+      dockerfile: Dockerfile
+    volumes:
+      - ./devices/thermometer/src:/var/www/html
+    networks:
+      - remote
+
+networks:
+  remote:
