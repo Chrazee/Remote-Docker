@@ -15,5 +15,11 @@ Host: http://127.0.0.1:80
 Default username: remote  
 Default password: remote
 
+# troubleshooting
+If something went wrong with the first start, re-run the helper service with the following command:
+```shell script
+docker-compose run --rm helper
+```
+
 # Extras
 A thermometer device simulator
