@@ -22,7 +22,6 @@ services:
     volumes:
     - ./data/web:/var/www/html
     links:
-      - device_relay:device_relay
       - device_thermometer:device_thermometer
     networks:
       - remote
